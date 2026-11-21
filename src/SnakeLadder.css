@@ -1,0 +1,68 @@
+.sl-win {
+  background: linear-gradient(135deg, #101827, #243b55) !important;
+  border: 3px solid #FFD700 !important;
+  box-shadow: 0 0 20px #FFD700, 0 0 40px rgba(255, 215, 0, 0.5) !important;
+}
+
+.sl-win h1 {
+  color: #FFD700 !important;
+  text-shadow: 0 0 10px #FFD700, 0 0 25px orange !important;
+}
+
+.sl-win h2 {
+  color: #FFF0A6 !important;
+}
+
+.sl-win button {
+  background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+  color: #241500 !important;
+  border: 2px solid #FFF0A6 !important;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+}
+.sl-win p {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+.sl-win-subtitle {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.sl-root{background:#1f3a2e;color:#f3e9d2;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px;font-family:"Trebuchet MS","Segoe UI",sans-serif;box-sizing:border-box}
+.sl-root *{box-sizing:border-box}
+.sl-root h1{font-size:1.4rem;margin:6px 0 10px}
+.sl-setup,.sl-game{width:100%;max-width:460px}
+.sl-setup{display:flex;flex-direction:column;gap:16px}
+.sl-panel{background:linear-gradient(#2a56c6,#1b3a9a);border:2px solid #4fb3f0;border-radius:26px;padding:16px 12px 20px;text-align:center}
+.sl-panel.light{background:linear-gradient(#58acec,#3a86d1)}
+.sl-panel h2{margin:0 0 16px;font-size:1.25rem;letter-spacing:.5px;color:#fff;text-shadow:0 2px 3px #0005}
+.sl-row{display:flex;justify-content:center;gap:14px}
+.sl-tile{position:relative;font:inherit;width:84px;height:92px;border-radius:18px;border:2px solid #7fd0f5;background:#2f8fe0;color:#fff;font-weight:800;font-size:1.3rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:0}
+.sl-tile.col{width:66px;height:76px}
+.sl-tile.on{background:#e8aa22;border-color:#f5cf6a}
+.sl-tile.on::after{content:"✓";position:absolute;top:-10px;right:-10px;width:28px;height:28px;border-radius:50%;background:#2fa84f;border:2px solid #fff;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center}
+.sl-pawn{position:relative;width:34px;height:44px;isolation:isolate}
+.sl-pawn::before{content:"";position:absolute;left:3px;top:0;width:28px;height:28px;border-radius:50%;background:var(--pc);box-shadow:inset 0 -5px 8px #0003}
+.sl-pawn::after{content:"";position:absolute;left:0;top:20px;width:34px;height:24px;background:#fff;clip-path:polygon(50% 100%,0 40%,15% 0,85% 0,100% 40%);z-index:-1}
+.sl-go{font:inherit;font-size:1.3rem;font-weight:800;color:#fff;background:#2fa84f;border:3px solid #7be39a;border-radius:18px;padding:14px;cursor:pointer;letter-spacing:1px}
+.sl-board{position:relative;width:100%;aspect-ratio:1;border:4px solid #e9c46a;border-radius:6px;overflow:hidden}
+.sl-grid{display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);width:100%;height:100%}
+.sl-cell{padding:2px;font-size:clamp(8px,2.4vw,12px);font-weight:800;color:#111}
+.sl-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.sl-tok{position:absolute;width:5.2%;height:5.2%;border-radius:50%;border:2px solid #fff;transition:left .25s,top .25s;box-shadow:0 1px 3px #0008}
+.sl-bar{display:flex;align-items:center;gap:12px;margin-top:12px}
+.sl-roll{font:inherit;font-size:1.3rem;color:#fff;border:none;border-radius:14px;padding:16px 22px;font-weight:700;cursor:pointer;flex:1;text-shadow:0 1px 2px #0006;transition:background .2s}
+.sl-roll:disabled{opacity:.6}
+.sl-die{width:64px;height:64px;border-radius:12px;background:#fff;color:#23301f;display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;border:5px solid #d62839;cursor:pointer;user-select:none;transition:border-color .2s}
+.sl-die.rolling{animation:sl-shake .14s infinite}
+@keyframes sl-shake{0%{transform:rotate(-12deg) scale(1.08)}50%{transform:rotate(12deg) scale(1.08)}100%{transform:rotate(-12deg) scale(1.08)}}
+.sl-win{margin-top:12px;background:#f3e9d2;color:#23301f;border-radius:12px;padding:14px;text-align:center;font-size:1.2rem}
+.sl-win button{font:inherit;margin-top:8px;padding:8px 16px;border-radius:8px;border:2px solid #23301f;background:#fff;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.sl-tok{transition:none}.sl-die.rolling{animation:none}}
