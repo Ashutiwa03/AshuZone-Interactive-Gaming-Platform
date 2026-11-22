@@ -56,6 +56,16 @@ const LANE = {
 const trackIdx = (color, p) => (p >= 1 && p <= 51 ? (START[color] + p - 1) % 52 : -1);
 const cellOf = (color, p) => (p <= 51 ? TRACK[trackIdx(color, p)] : LANE[color][p - 52]);
 const canMove = (t, d) => (t === 0 ? d === 6 : t !== 57 && t + d <= 57);
+const getNextTurn = (current, players, finished) => {
+  for (let step = 1; step <= players.length; step++) {
+    const index = (current + step) % players.length;
+
+    if (!finished.some((p) => p.color === players[index].color)) {
+      return index;
+    }
+  }
+  return current;
+};
 
 const createPlayers = (count, sel, vsComputer) => {
   const s = Math.max(0, ORDER.indexOf(sel));
@@ -106,15 +116,20 @@ export default function LudoBoard({ playerCount = 2, selectedColor = "red", game
   const [dice, setDice] = useState(null); // null = not rolled yet
   const [rolling, setRolling] = useState(false);
   const [winner, setWinner] = useState(null);
+  const [finishOrder, setFinishOrder] = useState([]);
   const [note, setNote] = useState("");
   const [tries, setTries] = useState(0); // failed 6-attempts when all tokens are in base
 
   const newGame = () => {
-    setTries(0);
-    setPlayers(createPlayers(playerCount, selectedColor, vsComputer));
-    setTurn(0); setDice(null); setRolling(false); setWinner(null); setNote("");
-  };
-
+  setTries(0);
+  setPlayers(createPlayers(playerCount, selectedColor, vsComputer));
+  setTurn(0);
+  setDice(null);
+  setRolling(false);
+  setWinner(null);
+  setFinishOrder([]);
+  setNote("");
+};
   // Restart when mode / players / colour change.
   useEffect(newGame, [playerCount, selectedColor, vsComputer]); // eslint-disable-line
 
@@ -146,38 +161,121 @@ export default function LudoBoard({ playerCount = 2, selectedColor = "red", game
   const steps = [];
   for (let s = old + 1; s <= np; s++) steps.push(s);
 
-  const finish = () => {
-    const next = players.map((p, pi) => {
-      if (pi === turn) return { ...p, tokens: p.tokens.map((t, k) => (k === ti ? np : t)) };
-      if (cell < 0 || SAFE.includes(cell)) return p;
+   const finish = () => {
+  // Moving token ki final position update
+  let next = players.map((p, pi) => {
+    if (pi === turn) {
+      return {
+        ...p,
+        tokens: p.tokens.map((t, k) => (k === ti ? np : t)),
+      };
+    }
+    return p;
+  });
+
+  // 1. Destination block par capture check
+  if (cell >= 0 && !SAFE.includes(cell)) {
+    next = next.map((p, pi) => {
+      if (pi === turn) return p;
+
+      const tokensOnCell = p.tokens.filter(
+        (t) => trackIdx(p.color, t) === cell
+      ).length;
+
+      if (tokensOnCell !== 1) return p;
+
       return {
         ...p,
         tokens: p.tokens.map((t) => {
-          if (trackIdx(p.color, t) === cell) { captured = true; return 0; }
+          if (trackIdx(p.color, t) === cell) {
+            captured = true;
+            return 0;
+          }
           return t;
         }),
       };
     });
+  }
 
-    setPlayers(next);
-    setDice(null);
-    setTries(0);
-    setRolling(false);
+  // 2. Purane block par pair tootne ka check
+  const oldCell = trackIdx(me.color, old);
 
-    if (next[turn].tokens.every((t) => t === 57)) {
-      setWinner(me);
-      celebrate();
-      setTimeout(() => playSound("win"), 300);
-      return;
+  if (oldCell >= 0 && !SAFE.includes(oldCell)) {
+    const remainingMyTokens = next[turn].tokens.filter(
+      (t) => trackIdx(me.color, t) === oldCell
+    ).length;
+
+    const opponentPresent = next.some(
+      (p, pi) =>
+        pi !== turn &&
+        p.tokens.some((t) => trackIdx(p.color, t) === oldCell)
+    );
+
+    if (remainingMyTokens === 1 && opponentPresent) {
+      next = next.map((p, pi) => {
+        if (pi !== turn) return p;
+
+        return {
+          ...p,
+          tokens: p.tokens.map((t) => {
+            if (trackIdx(me.color, t) === oldCell) {
+              captured = true;
+              return 0;
+            }
+            return t;
+          }),
+        };
+      });
     }
+  }
 
-    const bonus = dice === 6 || captured || np === 57;
-    if (captured) setNote("Token captured! 💥 Roll again");
-    else if (np === 57) {setNote("Token home!  🏠 Bonus turn"); celebrate();}
-    else if (dice === 6) setNote("Six! 🎲 Bonus turn");
-    else setNote("");
-    if (!bonus) setTurn((turn + 1) % players.length);
-  };
+  setPlayers(next);
+  setDice(null);
+  setTries(0);
+  setRolling(false);
+
+  if (next[turn].tokens.every((t) => t === 57)) {
+  const updatedOrder = [...finishOrder, me];
+
+  const remainingPlayers = next.filter(
+    (p) => !updatedOrder.some((f) => f.color === p.color)
+  );
+
+  if (updatedOrder.length >= players.length - 1) {
+    const finalOrder = [...updatedOrder, ...remainingPlayers];
+
+    setFinishOrder(finalOrder);
+    setWinner(updatedOrder[0]);
+
+    celebrate();
+    setTimeout(() => playSound("win"), 300);
+    return;
+  }
+
+  setFinishOrder(updatedOrder);
+
+  setTurn(getNextTurn(turn, next, updatedOrder));
+  setNote(`${me.name} finished! Rank: ${updatedOrder.length}`);
+
+  celebrate();
+  setTimeout(() => playSound("win"), 300);
+  return;
+}
+
+  const bonus = dice === 6 || captured || np === 57;
+
+  if (captured) setNote("Token captured! 💥 Roll again");
+  else if (np === 57) {
+    setNote("Token home! 🏠 Bonus turn");
+    celebrate();
+  }
+  else if (dice === 6) setNote("Six! 🎲 Bonus turn");
+  else setNote("");
+
+  if (!bonus) {
+  setTurn(getNextTurn(turn, players, finishOrder));
+}
+   };
 
   setRolling(true); // animation ke time koi aur click na ho
 
@@ -208,11 +306,11 @@ export default function LudoBoard({ playerCount = 2, selectedColor = "red", game
       } else {
         setTries(0);
         setNote(`${me.name}: rolled ${dice}, no move available ❌`);
-        setTurn((x) => (x + 1) % players.length);
+       setTurn(getNextTurn(turn, players, finishOrder));
       }
     }, 1000);
     return () => clearTimeout(t);
-  }, [winner, rolling, dice, movable.length, players.length, tries, turn]);
+  }, [winner, rolling, dice, movable.length, players.length, tries, turn , finishOrder]);
 
   // Computer plays by itself: roll, then pick best token.
   useEffect(() => {
@@ -327,7 +425,7 @@ export default function LudoBoard({ playerCount = 2, selectedColor = "red", game
         <aside className="side">
           <div className="card">
             <div className="label">
-              Mode: {vsComputer ? "Computer 🤖" : "Local 👥"} · Abhi kiski baari
+              Mode: {vsComputer ? "Computer 🤖" : "Local 👥"} · It's Your Turn!
             </div>
             <div className="turn">
               <i style={{ background: COLORS[me?.color || "red"].main }} />
@@ -350,7 +448,26 @@ export default function LudoBoard({ playerCount = 2, selectedColor = "red", game
               </div>
             ))}
           </div>
+{finishOrder.length > 0 && (
+  <div className="card">
+    <div className="label">🏆 FINISHING ORDER</div>
 
+    {finishOrder.map((p, index) => {
+      const ranks = ["1st", "2nd", "3rd", "4th"];
+      const medals = ["🥇", "🥈", "🥉", "🏅"];
+
+      return (
+        <div className="prow" key={p.color}>
+          <i style={{ background: COLORS[p.color].main }} />
+          <span>
+            {medals[index]} {p.name}
+          </span>
+          <b>{ranks[index]}</b>
+        </div>
+      );
+    })}
+  </div>
+)}
           <button className="new" onClick={newGame}>New Game</button>
         </aside>
       </div>
