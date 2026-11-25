@@ -25,21 +25,42 @@ The platform brings classic games together to provide an enjoyable gaming experi
 
 ## 📂 Project Structure
 
-```text
+``` text
 AshuZone/
 ├── public/
-│   ├── images/
-│   └── sounds/
+│   ├── sounds/
+│   │   ├── dice.mp4
+│   │   ├── ludobg.mp3
+│   │   ├── move.mp4
+│   │   └── win.mp4
+│   ├── favicon.svg
+│   └── icons.svg
 ├── src/
+│   ├── assets/
 │   ├── components/
+│   │   └── GameIntro.jsx
 │   ├── games/
+│   │   ├── screenshots/
+│   │   │   └── main-page.png
+│   │   ├── Chess.jsx
+│   │   ├── ComputerSetup.jsx
+│   │   ├── Ludo.jsx
+│   │   ├── LudoBoard.jsx
+│   │   └── SnakeLadder.jsx
 │   ├── pages/
-│   ├── App.jsx
+│   │   └── Home.jsx
 │   ├── App.css
+│   ├── App.jsx
 │   ├── index.css
-│   └── main.jsx
+│   ├── main.jsx
+│   ├── playSound.js
+│   └── SnakeLadder.css
+├── .gitignore
+├── eslint.config.js
 ├── index.html
+├── package-lock.json
 ├── package.json
+├── README.md
 └── vite.config.js
 ```
 
@@ -85,6 +106,10 @@ http://localhost:5173/
 - Improve the gaming experience.
 - Introduce additional game modes.
 - Enhance the user interface.
+
+## 📸 Screenshot
+
+![AshuZone Main Page](src/games/screenshots/main-page.png)
 
 ## 👨‍💻 Author
 
